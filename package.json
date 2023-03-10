@@ -4,12 +4,15 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "run-p start-compile start-run",
     "start-compile": "tsc --watch",
-    "start-run": "browser-sync start --server -w"
+    "start-run": "browser-sync start --server -w --ss ./build/assets/"
   },
   "devDependencies": {
     "@types/p5": "1.4.3",
     "browser-sync": "^2.28.1",
     "npm-run-all": "^4.1.5",
     "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "big-js": "^3.1.3"
   }
 }
