@@ -1,3 +1,5 @@
+import { Color, Vector } from "p5";
+
 const G = 6.67408 * (10 ** (-11));
 const AU = 1.49597870691 * 10**8;
 const SOLAR_MASS = 1.989 * 10 ** 30;
@@ -9,9 +11,6 @@ const MASS_MOON = 3.69432 * 10 ** (-8) * SOLAR_MASS;
 var zoom = 10 ** 6;
 var timeStep = 1000000; // seconds
 var time = 0; // seconds
-
-type Vector = p5.Vector
-type Color = p5.Color
 
 const GM = (combinedMass: number) => G * combinedMass * 10 ** (-9);
 
@@ -138,10 +137,20 @@ class StationaryBody extends Body {
   }
 }
 
+declare global {
+  interface Window {
+      setup(): void
+      draw(): void
+      keyPressed(): void
+      mousePressed(): void
+      windowResized(): void
+  }
+}
+
 let bodies: Body[] = [];
 let cameraController: CameraController = null;
 
-function setup() {
+window.setup = () => {
   createCanvas(windowWidth, windowHeight)
 
   const sun = new StationaryBody("Sun", MASS_SUN, createVector(0, 0), color(255, 255, 0))
@@ -151,7 +160,7 @@ function setup() {
   cameraController = new CameraController(sun, 100);
 }
 
-function windowResized() {
+window.windowResized = () => {
   resizeCanvas(windowWidth, windowHeight);
 }
 
@@ -162,7 +171,7 @@ const timeDay = () => timeHour() / 24
 const timeYears = () => timeDay() / 365
 const secToDay = (t: number) => ((t / 60) / 60) / 24
 
-function draw() {
+window.draw = () => {
   background(0);
 
   fill(255, 255, 255);
@@ -178,12 +187,12 @@ function draw() {
   time += timeStep * (deltaTime / 1000);
 }
 
-function mouseWheel(event: any) {
+window.mouseWheel = (event: any) => {
   zoom *= (event.delta > 0) ? 1.5 : 0.5;
   zoom = max(zoom, 0);
 }
 
-function keyPressed() {
+window.keyPressed = () => {
   if (key == ',') {
     timeStep /= 2;
   }
@@ -192,7 +201,7 @@ function keyPressed() {
   }
 }
 
-function mousePressed() {
+window.mousePressed = () => {
   for (const body of bodies) {
     if (worldToScreen(body.pos).dist(createVector(mouseX, mouseY)) < 10) {
       cameraController.setTarget(body);
