@@ -5,7 +5,7 @@ export class CameraController {
     private target: Body;
     private startTimeMs: number;
 
-    constructor(private focusedBody: Body, private lerpSpeedMs: number, public zoom: number = 10 ** 6) {
+    constructor(private focusedBody: Body, private lerpSpeedMs: number, public zoom: number = 10**6.3) {
         this.target = focusedBody;
     }
 
@@ -30,6 +30,8 @@ export class CameraController {
     }
 
     worldToScreen(v: Vector): Vector {
-        return v.copy().sub(this.currentPos).div(this.zoom).add(createVector(width / 2, height / 2));
+        const relPos = v.copy().sub(this.currentPos);
+        const zoomed = relPos.div(this.zoom);
+        return zoomed.add(createVector(width / 2, height / 2));
     }
 }

@@ -32,6 +32,7 @@ window.draw = () => {
   text(`timeStep: ${secToDay(sim.timeStep)} days`, 20, 80);
 
   sim.tick(deltaTime);
+
   sim.draw();
 }
 

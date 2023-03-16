@@ -1,6 +1,6 @@
 import { Vector, Color } from "p5";
 import { CameraController } from "./CameraController.js";
-import { AU, GM } from "./Math.js";
+import { G, GM, secToDay } from "./Math.js";
 import { Simulation } from "./Simulation.js";
 
 export abstract class Body {
@@ -17,25 +17,29 @@ export abstract class Body {
 
     abstract get pos(): Vector;
 
-    abstract draw(cam: CameraController): void;
-    abstract tick(sim: Simulation): void;
+    draw(cam: CameraController) {
+        push();
+        noStroke();
+        fill(this.col);
+        const screenPos = cam.worldToScreen(this.pos);
+        circle(screenPos.x, screenPos.y, 10);
+        pop();
+    }
+
+    abstract tick(sim: Simulation, dt: number): void;
 }
 
 export class BodyOnRails extends Body {
 
-    constructor(public parent: Body, public eccentricity: number, public semiMajorAxisAU: number, name: String, mass: number, col?: Color) {
+    constructor(public parent: Body, public argumentOfPeriapsisDeg: number, public eccentricity: number, public semiMajorAxisM: number, name: String, mass: number, col?: Color) {
         super(name, mass, createVector(0, 0), col);
         if (eccentricity >= 1 || eccentricity < 0) {
             throw Error(`Error while initiliazing "${name}": eccentricity must be >= 0 and < 1, not ${eccentricity}!`);
         }
     }
 
-    get semiMajorAxisKm() {
-        return this.semiMajorAxisAU * AU;
-    }
-
     trueAnomaly(sim: Simulation) {
-        const n = sqrt(GM(this.parent.mass + this.mass) / this.semiMajorAxisKm ** 3); // mean motion
+        const n = sqrt(GM(this.parent.mass + this.mass) / this.semiMajorAxisM ** 3); // mean motion
         const M = n * sim.timeSec; // mean anomaly
         let E = M; // initial guess for eccentric anomaly
         while (true) {
@@ -47,26 +51,26 @@ export class BodyOnRails extends Body {
         return theta;
     }
 
-    tick(sim: Simulation) { // TODO: how does this work...
+    tick(sim: Simulation, _dt: number) { // TODO: how does this work...
         // calculate focus
-        const omega = 45; // argument of periapsis in degrees
+        const omega = this.argumentOfPeriapsisDeg; // argument of periapsis in degrees
         const focus = createVector(this.eccentricity * cos(radians(omega)), this.eccentricity * sin(radians(omega)));
 
         // calculate true anomaly
         const theta = this.trueAnomaly(sim);
 
+        if (this.name == "Moon") {
+            push();
+            fill(0, 0, 0);
+            rect(20, 100, 200, 20);
+            pop();
+            const T = 2*PI*sqrt((this.semiMajorAxisM**3) / GM(this.parent.mass + this.mass));
+            text(secToDay(T), 20, 110);
+        }
+
         // calculate distance from parent
-        const r = this.semiMajorAxisKm * (1 - this.eccentricity * this.eccentricity) / (1 + this.eccentricity * cos(theta));
-
+        const r = this.semiMajorAxisM * (1 - this.eccentricity * this.eccentricity) / (1 + this.eccentricity * cos(theta));
         this._pos = createVector(cos(theta + radians(omega)), sin(theta + radians(omega))).mult(r).add(focus);
-    }
-
-    draw(cam: CameraController) {
-        push();
-        fill(this.col);
-        const screenPos = cam.worldToScreen(this.pos);
-        circle(screenPos.x, screenPos.y, 20);
-        pop();
     }
 
     get pos(): Vector {
@@ -75,20 +79,42 @@ export class BodyOnRails extends Body {
 }
 
 export class StationaryBody extends Body {
-    tick() {
+    tick(_sim: Simulation, _dt: number) {
 
-    }
-
-    draw(cam: CameraController) {
-        push();
-        fill(this.col);
-        const screenPos = cam.worldToScreen(this.pos);
-        console.log(screenPos)
-        circle(screenPos.x, screenPos.y, 20);
-        pop();
     }
 
     get pos(): Vector {
+        return this._pos.copy();
+    }
+}
+
+export class DynamicBody extends Body {
+    constructor(public _pos: Vector, public vel: Vector, name: String, mass: number, col?: Color) {
+        super(name, mass, createVector(0, 0), col);
+    }
+
+    calculateAccelerationsMPS(sim: Simulation) {
+        return sim.bodies.map(b => {
+            if (b == this) return createVector(0, 0);
+
+            // m
+            const r = this._pos.dist(b.pos);
+
+            // m/s^2
+            const g = (G * b.mass) / (r ** 2);
+            return b.pos.copy().sub(this.pos).normalize().mult(g);
+        });
+    }
+
+    tick(sim: Simulation, dt: number) {
+        const forces = this.calculateAccelerationsMPS(sim);
+        const acc = forces.reduce((prev, curr) => prev.add(curr));
+        acc.mult(dt);
+        this.vel.add(acc);
+        this._pos.add(this.vel.copy().mult(dt));
+    }
+
+    get pos() {
         return this._pos.copy();
     }
 }
