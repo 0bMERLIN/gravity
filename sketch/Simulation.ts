@@ -17,20 +17,20 @@ export class Simulation {
 
     constructor() {
         const sun = new StationaryBody("Sun", MASS_SUN, createVector(0, 0), color(255, 255, 0));
-        const earth = new BodyOnRails(sun, 90, 0, AU, "Earth", MASS_EARTH*100, color(0, 255, 0));
-        const moon = new BodyOnRails(earth, 0, 0, 0.002569 * AU, "Moon", MASS_MOON, color(80, 80, 80));
+        const earth = new BodyOnRails(sun, 0, .5, AU, "Earth", MASS_EARTH, color(0, 255, 0));
+        // const moon = new BodyOnRails(earth, 0, 0, 0.002569 * AU, "Moon", MASS_MOON, color(80, 80, 80));
 
-        this.bodies.push(earth, sun, moon);
+        this.bodies.push(earth, sun);
 
         this.tick(0.0001);
 
-        const spacecraft = new DynamicBody(
-            earth.pos.add(createVector(0, 384_400_000)),
-            createVector(-29780 - 10000, 0),
-            "Spacecraft", MASS_MOON, color(255, 0, 255));
+        // const spacecraft = new DynamicBody(
+        //     earth.pos.add(createVector(0, 384_400_000)),
+        //     createVector(-29780 - 1000, 0),
+        //     "Spacecraft", 0, color(255, 0, 255));
 
-        this.bodies.push(spacecraft);
-        this.cameraController = new CameraController(earth, 500);
+        // this.bodies.push(spacecraft);
+        this.cameraController = new CameraController(sun, 500);
     }
 
     tick(dt: number) {

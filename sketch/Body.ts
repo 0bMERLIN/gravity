@@ -52,29 +52,26 @@ export class BodyOnRails extends Body {
     }
 
     tick(sim: Simulation, _dt: number) { // TODO: how does this work...
-        // calculate focus
         const omega = this.argumentOfPeriapsisDeg; // argument of periapsis in degrees
-        const focus = createVector(this.eccentricity * cos(radians(omega)), this.eccentricity * sin(radians(omega)));
 
         // calculate true anomaly
         const theta = this.trueAnomaly(sim);
 
-        if (this.name == "Moon") {
-            push();
-            fill(0, 0, 0);
-            rect(20, 100, 200, 20);
-            pop();
-            const T = 2*PI*sqrt((this.semiMajorAxisM**3) / GM(this.parent.mass + this.mass));
-            text(secToDay(T), 20, 110);
-        }
-
         // calculate distance from parent
         const r = this.semiMajorAxisM * (1 - this.eccentricity * this.eccentricity) / (1 + this.eccentricity * cos(theta));
-        this._pos = createVector(cos(theta + radians(omega)), sin(theta + radians(omega))).mult(r).add(focus);
+        this._pos = createVector(cos(theta + radians(omega)), sin(theta + radians(omega))).mult(r);
     }
 
     get pos(): Vector {
         return this._pos.copy().add(this.parent.pos);
+    }
+
+    draw(cam: CameraController) {
+        push();
+        super.draw(cam);
+
+        // TODO
+        pop();
     }
 }
 
