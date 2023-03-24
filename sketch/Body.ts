@@ -70,7 +70,27 @@ export class BodyOnRails extends Body {
         push();
         super.draw(cam);
 
-        // TODO
+        const dF = this.semiMajorAxisM * this.eccentricity;
+
+        const FPnorm = createVector(cos(radians(this.argumentOfPeriapsisDeg)), sin(radians(this.argumentOfPeriapsisDeg)));
+        const FP = FPnorm.copy().mult(dF);
+        
+        stroke(255, 0, 0);
+        const Ps = cam.worldToScreen(this.parent.pos);
+        const foo = Ps.copy().sub(cam.worldToScreen(FP));
+        line(Ps.x, Ps.y, foo.x, foo.y)
+
+        const p = cam.worldToScreen(this.parent.pos.add(FP));
+
+        const minorAxis = sqrt(this.semiMajorAxisM**2 - (this.semiMajorAxisM * this.eccentricity)**2);
+
+        fill(255, 0, 0);
+
+        noFill();
+        stroke(255, 0, 0);
+        strokeWeight(3);
+        ellipse(p.x, p.y, cam.worldToScreenDist(this.semiMajorAxisM)*2, cam.worldToScreenDist(minorAxis) * 2, 100)
+
         pop();
     }
 }

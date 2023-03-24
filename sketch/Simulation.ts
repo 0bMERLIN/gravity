@@ -17,7 +17,7 @@ export class Simulation {
 
     constructor() {
         const sun = new StationaryBody("Sun", MASS_SUN, createVector(0, 0), color(255, 255, 0));
-        const earth = new BodyOnRails(sun, 0, .5, AU, "Earth", MASS_EARTH, color(0, 255, 0));
+        const earth = new BodyOnRails(sun, 50, .5, AU, "Earth", MASS_EARTH, color(0, 255, 0));
         // const moon = new BodyOnRails(earth, 0, 0, 0.002569 * AU, "Moon", MASS_MOON, color(80, 80, 80));
 
         this.bodies.push(earth, sun);
