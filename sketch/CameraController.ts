@@ -1,15 +1,15 @@
 import { Vector } from "p5";
-import { Body } from "./Body.js";
+import { Entity } from "./body/Entity.js";
 
 export class CameraController {
-    private target: Body;
+    private target: Entity;
     private startTimeMs: number;
 
-    constructor(private focusedBody: Body, private lerpSpeedMs: number, public zoom: number = 10**8.7) {
-        this.target = focusedBody;
+    constructor(private focusedEntity: Entity, private lerpSpeedMs: number, public zoom: number = 120_000/*10**8.7*/) {
+        this.target = focusedEntity;
     }
 
-    setTarget(target: Body) {
+    setTarget(target: Entity) {
         this.target = target;
         this.startTimeMs = millis();
     }
@@ -17,16 +17,16 @@ export class CameraController {
     get currentPos(): Vector {
         const timeSinceAnimStart = millis() - this.startTimeMs;
 
-        if (this.target == this.focusedBody) {
-            return this.focusedBody.pos;
+        if (this.target == this.focusedEntity) {
+            return this.focusedEntity.pos;
         }
 
         if (timeSinceAnimStart > this.lerpSpeedMs) {
-            this.focusedBody = this.target;
-            return this.focusedBody.pos;
+            this.focusedEntity = this.target;
+            return this.focusedEntity.pos;
         }
 
-        return this.focusedBody.pos.lerp(this.target.pos, timeSinceAnimStart / this.lerpSpeedMs);
+        return this.focusedEntity.pos.lerp(this.target.pos, timeSinceAnimStart / this.lerpSpeedMs);
     }
 
     worldToScreen(v: Vector): Vector {
@@ -35,7 +35,13 @@ export class CameraController {
         return zoomed.add(createVector(width / 2, height / 2));
     }
 
+    // (SP - (width / 2, height / 2)) * zoom + off = WP
+
     worldToScreenDist(d: number): number {
         return d / this.zoom;
+    }
+
+    screenToWorld(v: Vector) {
+        return v.copy().sub(createVector(width / 2, height / 2)).mult(this.zoom).add(this.currentPos);
     }
 }

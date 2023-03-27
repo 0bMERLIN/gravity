@@ -1,4 +1,6 @@
-import { Body, BodyOnRails, DynamicBody, StationaryBody } from "./Body.js";
+import { BodyOnRails } from "./body/BodyOnRails.js";
+import { Entity } from "./body/Entity.js";
+import { StationaryBody } from "./body/StationaryBody.js";
 import { CameraController } from "./CameraController.js";
 import { AU, MASS_EARTH, MASS_MOON, MASS_SUN } from "./Math.js";
 
@@ -9,7 +11,7 @@ export class Simulation {
     get timeDay() { return this.timeHour / 24 }
     timeStep = 10000; // seconds
 
-    bodies: Body[] = [];
+    entities: Entity[] = [];
 
     cameraController: CameraController
 
@@ -17,10 +19,10 @@ export class Simulation {
 
     constructor() {
         const sun = new StationaryBody("Sun", MASS_SUN, createVector(0, 0), color(255, 255, 0));
-        const earth = new BodyOnRails(sun, 50, .5, AU, "Earth", MASS_EARTH, color(0, 255, 0));
-        // const moon = new BodyOnRails(earth, 0, 0, 0.002569 * AU, "Moon", MASS_MOON, color(80, 80, 80));
+        const earth = new BodyOnRails(sun, 50, .5, AU*1000, "Earth", MASS_EARTH, color(0, 255, 0));
+        const moon = new BodyOnRails(earth, 0, 0, 0.002569 * AU*1000, "Moon", MASS_MOON, color(80, 80, 80));
 
-        this.bodies.push(earth, sun);
+        this.entities.push(earth, sun, moon);
 
         this.tick(0.0001);
 
@@ -30,7 +32,11 @@ export class Simulation {
         //     "Spacecraft", 0, color(255, 0, 255));
 
         // this.bodies.push(spacecraft);
-        this.cameraController = new CameraController(sun, 500);
+        this.cameraController = new CameraController(earth, 500);
+    }
+
+    focus(e: Entity) {
+        this.cameraController.setTarget(e);
     }
 
     tick(dt: number) {
@@ -38,15 +44,12 @@ export class Simulation {
             const step = (this.timeStep * (dt / 1000)) / this.nSubTicks;
             this.timeSec += step;
 
-            for (const body of this.bodies) body.tick(this, step);
-            if (this.cameraController != null) {
-                this.draw();
-            }
+            for (const body of this.entities) body.tick(this, step);
         }
     }
 
     draw() {
-        for (const body of this.bodies)
+        for (const body of this.entities)
             body.draw(this.cameraController);
     }
 }
