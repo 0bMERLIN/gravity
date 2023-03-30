@@ -1,7 +1,7 @@
 import { Vector, Color } from "p5";
 import { CameraController } from "../CameraController.js";
 import { Simulation } from "../Simulation.js";
-import { Entity } from "./Entity.js";
+import { Entity } from "../Entity.js";
 
 export abstract class Body extends Entity {
 

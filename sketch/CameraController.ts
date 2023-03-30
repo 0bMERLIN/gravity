@@ -1,11 +1,11 @@
 import { Vector } from "p5";
-import { Entity } from "./body/Entity.js";
+import { Entity } from "./Entity.js";
 
 export class CameraController {
     private target: Entity;
     private startTimeMs: number;
 
-    constructor(private focusedEntity: Entity, private lerpSpeedMs: number, public zoom: number = 120_000/*10**8.7*/) {
+    constructor(private focusedEntity: Entity, private lerpSpeedMs: number, public zoom: number = 10**6) {
         this.target = focusedEntity;
     }
 
@@ -34,8 +34,6 @@ export class CameraController {
         const zoomed = relPos.div(this.zoom);
         return zoomed.add(createVector(width / 2, height / 2));
     }
-
-    // (SP - (width / 2, height / 2)) * zoom + off = WP
 
     worldToScreenDist(d: number): number {
         return d / this.zoom;

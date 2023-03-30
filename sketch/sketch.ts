@@ -1,6 +1,6 @@
 import { Vector } from "p5";
 import { Body } from "./body/Body.js";
-import { Entity } from "./body/Entity.js";
+import { Entity } from "./Entity.js";
 import { CameraController } from "./CameraController.js";
 import { secToDay } from "./Math.js";
 import { Simulation } from "./Simulation.js";
@@ -16,11 +16,11 @@ declare global {
 }
 
 class FreeFloatingCamera extends Entity {
-    tick(sim: Simulation, dt: number): void {
+    tick(_sim: Simulation, _dt: number): void {
 
     }
 
-    draw(cam: CameraController): void {
+    draw(_cam: CameraController): void {
 
     }
 
@@ -54,8 +54,7 @@ window.draw = () => {
 }
 
 window.mouseWheel = (event: any) => {
-    sim.cameraController.zoom *= (event.delta > 0) ? 1.5 : 0.5;
-    sim.cameraController.zoom = max(sim.cameraController.zoom, 0);
+    sim.cameraController.zoom *= .5 + max(0, Math.sign(event.delta));
 }
 
 window.keyPressed = () => {

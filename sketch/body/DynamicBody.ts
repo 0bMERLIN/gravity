@@ -1,7 +1,7 @@
 import { Vector, Color } from "p5";
 import { G } from "../Math.js";
 import { Simulation } from "../Simulation.js";
-import { Body } from "./Body";
+import { Body } from "./Body.js";
 
 
 export class DynamicBody extends Body {
@@ -11,8 +11,7 @@ export class DynamicBody extends Body {
 
     calculateAccelerations(sim: Simulation) {
         return sim.entities.map(b => {
-            if (b == this || !(b instanceof Body))
-                return createVector(0, 0);
+            if (b == this || !(b instanceof Body)) return createVector(0, 0);
 
             // m
             const r = this._pos.dist(b.pos);

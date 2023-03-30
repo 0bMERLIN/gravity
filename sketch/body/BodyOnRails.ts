@@ -1,6 +1,6 @@
 import { Color, Vector } from "p5";
 import { CameraController } from "../CameraController.js";
-import { GM } from "../Math.js";
+import { G } from "../Math.js";
 import { Simulation } from "../Simulation.js";
 import { Body } from "./Body.js";
 
@@ -14,7 +14,7 @@ export class BodyOnRails extends Body {
     }
 
     trueAnomaly(sim: Simulation) {
-        const n = sqrt(GM(this.parent.mass + this.mass) / this.semiMajorAxisM ** 3); // mean motion
+        const n = sqrt((G * (this.parent.mass + this.mass)) / this.semiMajorAxisM ** 3); // mean motion
         const M = n * sim.timeSec; // mean anomaly
         let E = M; // initial guess for eccentric anomaly
 
