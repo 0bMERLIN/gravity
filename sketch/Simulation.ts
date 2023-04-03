@@ -6,44 +6,45 @@ import { CameraController } from "./CameraController.js";
 import { AU, MASS_EARTH, MASS_MOON, SOLAR_MASS } from "./Math.js";
 import { Vector } from "p5";
 
-// alpha: 0.0 to 1.0
-type TrailPoint = { position: Vector, alpha: number }
-
 class Trail extends Entity {
 
-    private points: TrailPoint[] = []
+    private points: Vector[] = []
+    private lastPush = 0;
 
     constructor(private following: Entity) {
         super(following.pos);
     }
 
     draw(cam: CameraController) {
-        let last = this.following.pos;
+        push();
+        strokeWeight(3);
+        stroke(255, 0, 0, 255);
+        noFill();
+        
+        beginShape();
 
-        for (const p of this.points) {
-            const P = cam.worldToScreen(p.position);
-            const L = cam.worldToScreen(last);
+        const F = cam.worldToScreen(this.following.pos);
+        curveVertex(F.x, F.y);
+        curveVertex(F.x, F.y);
 
-            push();
-            strokeWeight(3);
-            stroke(255, 0, 0, p.alpha * 255);
-            point(P.x, P.y);
-            pop();
-
-            last = p.position.copy();
+        for (let i = 0; i < this.points.length; i++) {
+            const P = cam.worldToScreen(this.points[i].copy().add(cam.currentPos));
+            curveVertex(P.x, P.y);
         }
+
+        
+        endShape();
+
+        pop();
     }
 
-    tick(_sim: Simulation, dt: number) {
-        if (this.points.length == 0 || this.points[this.points.length-1].alpha < .999) {
-            this.points.push({ position: this.following.pos.copy(), alpha: 1 });
-        }
+    tick(sim: Simulation, _dt: number) {
+        if (this.points.length > 10) this.points.pop();
 
-        this.points = this.points
-            // decrease alpha
-            .map(p => ({ ...p, alpha: p.alpha - 0.00001 * dt }))
-            // remove points with alpha < 0
-            .filter(p => p.alpha > 0);
+        if (sim.timeSec - this.lastPush > 100000) {
+            this.lastPush = sim.timeSec;
+            this.points.unshift(this.following.pos.sub(sim.cameraController.currentPos));
+        }
     }
 }
 

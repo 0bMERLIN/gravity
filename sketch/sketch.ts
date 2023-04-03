@@ -73,7 +73,7 @@ window.mousePressed = () => {
 
         // find all bodies within selection distance
         .filter(b =>
-            sim.cameraController.worldToScreen(b.pos).dist(createVector(mouseX, mouseY)) < b.drawRadius
+            sim.cameraController.worldToScreen(b.pos).dist(createVector(mouseX, mouseY)) < b.drawRadius * 2
         );
 
     if (nearbyBodies.length > 0) {
