@@ -3,7 +3,8 @@ import { CameraController } from "./CameraController";
 import { Simulation } from "./Simulation";
 
 export abstract class Entity {
-    constructor(public _pos: Vector) {
+
+    constructor(public _pos: Vector, public name: String) {
 
     }
 

@@ -42,4 +42,8 @@ export class CameraController {
     screenToWorld(v: Vector) {
         return v.copy().sub(createVector(width / 2, height / 2)).mult(this.zoom).add(this.currentPos);
     }
+
+    screenToWorldDist(d: number): number {
+        return d * this.zoom;
+    }
 }
