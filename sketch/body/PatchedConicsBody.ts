@@ -4,6 +4,8 @@ import { BodyOnRails } from "./BodyOnRails.js";
 import { Simulation } from "../Simulation.js";
 import { G } from "../Math.js";
 import { Entity } from "../Entity.js";
+import { DynamicBody } from "./DynamicBody.js";
+import { Trail } from "../Trail.js";
 
 // for visualization:
 // a vastly overengineered arrow, you can place into the world to visualize velocities, etc.
@@ -46,42 +48,37 @@ export class PatchedConicsBody extends BodyOnRails {
         if (!(this.parent instanceof BodyOnRails)) return;
         if (!(this.parent.parent instanceof BodyOnRails)) return;
 
-        const v = this.velocityVector(sim).add(this.parent.velocityVector(sim)).add(createVector(0,0,0.1));
-
-        /*
-        sim.paused = true;
-            console.log(v.mag());
-            sim.createEntity(new ArrowEntity(v, this.pos.copy(), "vel"));*/
+        const v = this.velocityVector(sim).add(this.parent.velocityVector(sim)).add(createVector(0, 0, 0.1));
 
         // https://orbital-mechanics.space/classical-orbital-elements/orbital-elements-and-the-state-vector.html
         // orbital state vectors to orbital elements, relative to parents parent
         const GM = G * (this.mass, this.parent.parent.mass);
         const relPos = this.pos.copy().sub(this.parent.parent.pos);
-        const angularMomentum = relPos.cross(v); // AAAAAAAAAAAAAAAAAAAAAAA
-
-        // node line
-        const K = createVector(0, 0, 1);
-        const nVec = K.copy().cross(angularMomentum);
-        const N = nVec.mag();
+        const r = relPos.mag();
+        const angularMomentum = relPos.cross(v);
 
         // eccentricity
         const eVec = v.copy().cross(angularMomentum).div(GM).sub(relPos.copy().normalize());
         const e = eVec.mag();
 
         // argument of periapsis
-        const omega = degrees(2 * PI * acos(nVec.copy().dot(eVec) / (N * e)))
-        
-        //sim.paused = true;
+        let omega = atan2(eVec.x, eVec.y);
+        if (omega > 0) omega += 2 * PI;
+        if (angularMomentum.mag() < 0) omega = 2 * PI - omega;
+        omega = 90 - degrees(omega);
+
+        // semi major axis
+        const a = 1 / ((2 / r) - (v.mag() ** 2 / GM));
 
         this.eccentricity = e;
         this.argumentOfPeriapsisDeg = omega;
-        this.semiMajorAxisM = relPos.mag();
+        this.semiMajorAxisM = a;
+        this.initialTrueAnomaly = 20 + degrees(relPos.angleBetween(createVector(1, 0)));
         this.parent = this.parent.parent;
     }
 
     tick(sim: Simulation, dt: number) {
         super.tick(sim, dt);
-        //this.parent.name != "Earth" && 
         if (this.parent instanceof BodyOnRails && this.pos.dist(this.parent.pos) > this.parentSOI()) {
             this.switchSOIParent(sim);
         }

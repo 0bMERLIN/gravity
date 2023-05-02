@@ -9,7 +9,7 @@ export abstract class Body extends Entity {
 
     // units: mass -> kg, spacial -> km
     constructor(public name: String, public mass: number, public _pos: Vector, col?: Color, public drawRadius: number = 15) {
-        super(_pos);
+        super(_pos, name);
         colorMode(HSB);
         if (col == null) this.col = color(random(0, 255), 250, 220);
         else this.col = col;
