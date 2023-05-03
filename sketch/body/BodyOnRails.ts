@@ -6,11 +6,22 @@ import { Body } from "./Body.js";
 
 export class BodyOnRails extends Body {
 
-    constructor(public parent: Body, public argumentOfPeriapsisDeg: number, public eccentricity: number, public semiMajorAxisM: number, public initialTrueAnomaly: number, name: String, mass: number, col?: Color) {
+    constructor(public parent: Body, public argumentOfPeriapsisDeg: number, public eccentricity: number, public semiMajorAxisM: number, public initialMeanAnomaly: number, name: String, mass: number, col?: Color) {
         super(name, mass, createVector(0, 0), col);
         if (eccentricity >= 1 || eccentricity < 0) {
             throw Error(`Error while initiliazing "${name}": eccentricity must be >= 0 and < 1, not ${eccentricity}!`);
         }
+    }
+
+    centerAbs() {
+        
+        const dF = this.semiMajorAxisM * this.eccentricity;
+
+        const FPnorm = createVector(cos(radians(this.argumentOfPeriapsisDeg)), sin(radians(this.argumentOfPeriapsisDeg)));
+
+        const FP = FPnorm.copy().mult(dF)
+
+        return this.parent.pos.sub(FP);
     }
 
     eccentricAnomaly(sim: Simulation) {
@@ -32,7 +43,7 @@ export class BodyOnRails extends Body {
     trueAnomaly(sim: Simulation) {
         const E = this.eccentricAnomaly(sim);
         const theta = 2 * atan(sqrt((1 + this.eccentricity) / (1 - this.eccentricity)) * tan(E / 2)); // true anomaly
-        return theta + this.initialTrueAnomaly;
+        return theta + this.initialMeanAnomaly; // makes velocity wrong
     }
 
     angularMomentumVec(sim: Simulation) {

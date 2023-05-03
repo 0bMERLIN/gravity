@@ -24,7 +24,7 @@ export class Simulation {
 
     sun = new StationaryBody("Sun", SOLAR_MASS, createVector(0, 0), color(255, 255, 0));
     earth = new BodyOnRails(this.sun, 90, 0, AU, 0, "Earth", MASS_EARTH, color(0, 255, 0));
-    moon = new BodyOnRails(this.earth, 0, 0, 0.002569 * AU, 0, "Moon", MASS_MOON, color(80, 80, 80));
+    moon = new BodyOnRails(this.earth, 300, 0, 0.002569 * AU, 0, "Moon", MASS_MOON, color(80, 80, 80));
 
     constructor() {
         const x = new PatchedConicsBody(this.moon, 130, 0.7, 66176154, 0, "X", 0, color(255, 0, 255));

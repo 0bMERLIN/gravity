@@ -70,11 +70,16 @@ export class PatchedConicsBody extends BodyOnRails {
         // semi major axis
         const a = 1 / ((2 / r) - (v.mag() ** 2 / GM));
 
+        // center of new orbit (intersect of axes)
         this.eccentricity = e;
         this.argumentOfPeriapsisDeg = omega;
         this.semiMajorAxisM = a;
-        this.initialTrueAnomaly = 20 + degrees(relPos.angleBetween(createVector(1, 0)));
         this.parent = this.parent.parent;
+
+        const centerRel = this.centerAbs().sub(this.parent.pos);
+
+        this.initialMeanAnomaly = centerRel.angleBetween(relPos) - this.trueAnomaly(sim) - PI;
+
     }
 
     tick(sim: Simulation, dt: number) {
@@ -82,7 +87,10 @@ export class PatchedConicsBody extends BodyOnRails {
         if (this.parent instanceof BodyOnRails && this.pos.dist(this.parent.pos) > this.parentSOI()) {
             this.switchSOIParent(sim);
         }
+        this.vel = this.velocityVector(sim).mag();
     }
+
+    vel: number
 
     draw(cam: CameraController) {
         push();
@@ -93,5 +101,7 @@ export class PatchedConicsBody extends BodyOnRails {
         const screenPos = cam.worldToScreen(this.parent.pos);
         circle(screenPos.x, screenPos.y, 2 * cam.worldToScreenDist(this.parentSOI()));
         pop();
+
+        text(`${this.vel}`, cam.worldToScreen(this.pos).x, cam.worldToScreen(this.pos).y);
     }
 }

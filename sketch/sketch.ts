@@ -81,6 +81,6 @@ window.mousePressed = () => {
     }
 
     else {
-        sim.cameraController.setTarget(new FreeFloatingCamera(sim.cameraController.screenToWorld(createVector(mouseX, mouseY))));
+        sim.cameraController.setTarget(new FreeFloatingCamera(sim.cameraController.screenToWorld(createVector(mouseX, mouseY)), "cam"));
     }
 }
