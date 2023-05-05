@@ -30,20 +30,20 @@ export class BodyOnRails extends Body {
         let E = M; // initial guess for eccentric anomaly
 
         let i;
-        let maxIter = 10; // TODO: very low - fix?
+        let maxIter = 200; // TODO: very low - fix?
         for (i = 0; i < maxIter; i++) {
             const dE = (M - E + this.eccentricity * sin(E)) / (1 - this.eccentricity * cos(E)); // Newton-Raphson iteration
             E += dE * 0.01;
             if (abs(dE) < 1e-4) break; // converged
         }
 
-        return E;
+        return E + this.initialMeanAnomaly;
     }
 
     trueAnomaly(sim: Simulation) {
         const E = this.eccentricAnomaly(sim);
         const theta = 2 * atan(sqrt((1 + this.eccentricity) / (1 - this.eccentricity)) * tan(E / 2)); // true anomaly
-        return theta + this.initialMeanAnomaly; // makes velocity wrong
+        return theta; // makes velocity wrong
     }
 
     angularMomentumVec(sim: Simulation) {
